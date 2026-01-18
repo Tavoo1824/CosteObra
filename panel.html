@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CosteObra · Panel interno</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        if (sessionStorage.getItem('auth') !== 'true') {
+            window.location.href = 'admin.html';
+        }
+    </script>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            padding: 2rem;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #334155;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            color: #93c5fd;
+            font-weight: 600;
+        }
+
+        button {
+            margin-top: 1rem;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #ef4444;
+            color: white;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Leads registrados</h1>
+
+    <table id="leads-table">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Nombre</th>
+                <th>Zona</th>
+                <th>Servicios</th>
+                <th>Mensaje</th>
+                <th>Urgente</th>
+                <th>Total (€)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button id="clear">Borrar todos los leads</button>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>

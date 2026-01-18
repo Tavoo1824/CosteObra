@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CosteObra · Acceso</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #020617;
+            color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .login {
+            background: #020617;
+            border: 1px solid #1e293b;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        input,
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            border-radius: 6px;
+            border: none;
+            font-size: 1rem;
+        }
+
+        input {
+            background: #020617;
+            border: 1px solid #334155;
+            color: white;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .error {
+            color: #ef4444;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login">
+        <h2>Acceso interno</h2>
+        <input type="password" id="password" placeholder="Contraseña">
+        <button onclick="login()">Entrar</button>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        const PASSWORD = "costeobra123"; // ← cambiar aquí
+
+        function login() {
+            const input = document.getElementById('password').value;
+            const error = document.getElementById('error');
+
+            if (input === PASSWORD) {
+                sessionStorage.setItem('auth', 'true');
+                window.location.href = 'panel.html';
+            } else {
+                error.textContent = 'Contraseña incorrecta';
+            }
+        }
+    </script>
+
+</body>
+
+</html>

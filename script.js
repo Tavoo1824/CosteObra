@@ -26,16 +26,16 @@ const SERVICES = [
     { id: 'as10', category: 'Alicatados y Solados', name: 'Plato ducha cerámico', basePrice: 180, unit: '€/ud' },
 
     // FONTANERÍA
-    { id: 'f1', category: 'Fontanería', name: 'Sustitución grifería', basePrice: 75, unit: '€/ud' },
+    { id: 'f1', category: 'Fontanería', name: 'Sustitución grifería', basePrice: 75, unit: '€/ud', urgentAllowed: true },
     { id: 'f2', category: 'Fontanería', name: 'Instalación lavabo', basePrice: 120, unit: '€/ud' },
     { id: 'f3', category: 'Fontanería', name: 'Instalación inodoro', basePrice: 140, unit: '€/ud' },
     { id: 'f4', category: 'Fontanería', name: 'Instalación plato ducha', basePrice: 220, unit: '€/ud' },
     { id: 'f5', category: 'Fontanería', name: 'Cambio tuberías', basePrice: 18, unit: '€/ml' },
-    { id: 'f6', category: 'Fontanería', name: 'Reparación fuga visible', basePrice: 90, unit: '€/ud' },
+    { id: 'f6', category: 'Fontanería', name: 'Reparación fuga visible', basePrice: 90, unit: '€/ud', urgentAllowed: true },
     { id: 'f7', category: 'Fontanería', name: 'Sustitución sifón', basePrice: 45, unit: '€/ud' },
     { id: 'f8', category: 'Fontanería', name: 'Instalación termo eléctrico', basePrice: 260, unit: '€/ud' },
-    { id: 'f9', category: 'Fontanería', name: 'Sustitución desagüe', basePrice: 70, unit: '€/ud' },
-    { id: 'f10', category: 'Fontanería', name: 'Llave de corte', basePrice: 40, unit: '€/ud' },
+    { id: 'f9', category: 'Fontanería', name: 'Sustitución desagüe', basePrice: 70, unit: '€/ud', urgentAllowed: true },
+    { id: 'f10', category: 'Fontanería', name: 'Llave de corte', basePrice: 40, unit: '€/ud', urgentAllowed: true },
 
     // ELECTRICIDAD
     { id: 'e1', category: 'Electricidad', name: 'Punto de luz', basePrice: 55, unit: '€/ud' },
@@ -179,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initUrgencyToggle();
     initInputs();
     updateBudgetSummary(); // Initial render
+    initLeadTracking(); // Lead tracking initialization
 });
 
 function initZoneSelector() {
@@ -319,13 +320,48 @@ function initInputs() {
 }
 
 function updateBudgetSummary() {
-    const breakdown = calculateBudget(state.selection, state.zone, state.isUrgent);
+    let breakdown = calculateBudget(state.selection, state.zone, state.isUrgent);
 
-    // Check if we should show the summary (hide if total is 0)
-    // React version returned null if total === 0. Let's do the same for the inner content or hide the container.
-    // However, usually it's better to show empty state or 0.
-    // The React code: `if (breakdown.total === 0) return null;`
-    // Let's implement that logic by hiding the content.
+    // Check for urgency availability
+    let hasUrgentServices = false;
+    for (const [id, qty] of Object.entries(state.selection)) {
+        if (qty > 0) {
+            const service = SERVICES.find(s => s.id === id);
+            if (service && service.urgentAllowed) {
+                hasUrgentServices = true;
+                break;
+            }
+        }
+    }
+
+    // Auto-disable urgency if not available
+    if (!hasUrgentServices && state.isUrgent) {
+        state.isUrgent = false;
+        document.getElementById('urgency-toggle').checked = false;
+        // Trigger UI update for the toggle visual
+        const card = document.querySelector('.urgency-card');
+        const icon = document.getElementById('alert-icon');
+        card.classList.remove('active');
+        icon.setAttribute('stroke', '#888');
+
+        // Recalculate breakdown with new state
+        breakdown = calculateBudget(state.selection, state.zone, state.isUrgent);
+    }
+
+    // Show/Hide Urgency Card & Update Text
+    const urgencySection = document.querySelector('.urgency-card') ? document.querySelector('.urgency-card').parentElement : null;
+    const urgencyTitle = document.querySelector('#urgency-title span');
+
+    if (urgencySection) {
+        if (hasUrgentServices) {
+            urgencySection.style.display = 'block';
+            if (urgencyTitle) {
+                urgencyTitle.textContent = "Servicio urgente · atención prioritaria";
+            }
+        } else {
+            urgencySection.style.display = 'none';
+        }
+    }
 
     // New Visibility Logic
     // count services with quantity > 0
@@ -384,4 +420,76 @@ function updateWhatsAppLink(breakdown) {
     document.getElementById('whatsapp-link').href = link;
     const miniLink = document.getElementById('whatsapp-mini-link');
     if (miniLink) miniLink.href = link;
+}
+
+/**
+ * GESTIÓN DE LEADS (Invisible)
+ */
+const LeadManager = {
+    STORAGE_KEY: 'costeobra_leads',
+
+    saveLead: function (leadData) {
+        try {
+            const leads = this.getLeads();
+            leads.push(leadData);
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(leads));
+            console.log('Lead registrado:', leadData.id);
+        } catch (e) {
+            console.error('Error al guardar lead:', e);
+        }
+    },
+
+    getLeads: function () {
+        try {
+            const data = localStorage.getItem(this.STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        } catch (e) {
+            console.error('Error al leer leads:', e);
+            return [];
+        }
+    },
+
+    clearLeads: function () {
+        localStorage.removeItem(this.STORAGE_KEY);
+        console.log('Leads borrados.');
+    }
+};
+
+// Exponer en consola
+window.getLeads = () => console.table(LeadManager.getLeads());
+window.clearLeads = () => LeadManager.clearLeads();
+
+function initLeadTracking() {
+    const handleContactClick = (e) => {
+        // Permitir comportamiento por defecto (abrir enlace) PERO interceptar para guardar datos primero.
+        // Dado que no prevenimos el default inmediatamente para que el enlace funcione,
+        // solo necesitamos asegurar que la operación de guardado sincrónica ocurra.
+
+        // Sin embargo, usualmente es más seguro prevenir default, guardar y luego abrir.
+        // Pero para enlaces de WhatsApp (a menudo target="_blank"), el clic directo es mejor para bloqueadores de popups.
+        // LocalStorage es síncrono, por lo que debería funcionar bien solo ejecutando la lógica.
+
+        const breakdown = calculateBudget(state.selection, state.zone, state.isUrgent);
+
+        const lead = {
+            id: 'lead_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            date: new Date().toISOString(),
+            zona: state.zone,
+            urgente: state.isUrgent,
+            services: breakdown.serviceLines.map(s => `${s.name} (x${s.quantity})`),
+            total: breakdown.total.toFixed(2),
+            user_input: {
+                name: state.name,
+                description: state.description
+            }
+        };
+
+        LeadManager.saveLead(lead);
+    };
+
+    const mainBtn = document.getElementById('whatsapp-link');
+    const miniBtn = document.getElementById('whatsapp-mini-link');
+
+    if (mainBtn) mainBtn.addEventListener('click', handleContactClick);
+    if (miniBtn) miniBtn.addEventListener('click', handleContactClick);
 }
