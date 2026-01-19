@@ -407,6 +407,15 @@ function updateBudgetSummary() {
         urgencyRow.style.display = 'none';
     }
 
+    // Update Urgency Notice visibility
+    const urgencyNotice = document.getElementById('urgency-notice');
+    if (urgencyNotice) {
+        urgencyNotice.style.display = (breakdown.urgencySurcharge > 0) ? 'block' : 'none';
+    }
+
+    // Update WhatsApp Hint Text - REMOVED to reduce noise
+    // The static text "Enviar presupuesto por WhatsApp" will remain.
+
     document.getElementById('val-total').textContent = breakdown.total.toFixed(2) + ' €';
 
     updateWhatsAppLink(breakdown);

@@ -127,7 +127,7 @@
                     </div>
                     <p style="font-size: 0.8rem; color: #999; margin-bottom: 1rem; margin-top: 0.5rem;">
                         Cálculo orientativo basado en servicios seleccionados, zona y margen de empresa aplicado de
-                        formavisible.
+                        forma visible.
                     </p>
 
                     <div style="margin-bottom: 1rem; font-size: 0.9rem;">
@@ -154,12 +154,18 @@
                             <span>Urgencia (+15%):</span>
                             <span id="val-urgency">+0.00 €</span>
                         </div>
+                        <div id="urgency-notice"
+                            style="display: none; font-size: 0.75rem; color: #d35400; margin-top: 4px; margin-bottom: 8px;">
+                            Servicio urgente: sujeto a disponibilidad inmediata del profesional. El precio final se
+                            confirmará tras la valoración directa.
+                        </div>
                         <div class="summary-total">
                             <span>TOTAL ESTIMADO:</span>
                             <div style="text-align: right;">
                                 <span id="val-total" class="text-gold">0.00 €</span>
                                 <div class="legal-disclaimer">
-                                    ℹ️ Estimación no vinculante (IGIC no incl.)
+                                    ℹ️ Estimación orientativa, no vinculante. Precio y disponibilidad se confirmará por
+                                    el profesional. IGIC no incluido.
                                 </div>
                             </div>
                         </div>
@@ -169,8 +175,8 @@
                         <input type="text" id="input-name" class="input-field" placeholder="Nombre (Opcional)">
                         <textarea id="input-desc" class="textarea-field"
                             placeholder="Ej: fuga en baño, urgente, piso en Las Palmas"></textarea>
-                        <p style="font-size: 0.75rem; color: #666; margin-top: 4px;">Tu mensaje se enviará junto con el
-                            presupuesto estimado por WhatsApp.</p>
+                        <p style="font-size: 0.75rem; color: #666; margin-top: 4px;">El profesional confirmará precio
+                            final y disponibilidad tras revisar tu caso.</p>
                     </div>
 
                     <a id="whatsapp-link" href="#" target="_blank" rel="noopener noreferrer"
@@ -191,7 +197,8 @@
                         </button>
                     </a>
                     <div style="margin-top: 0.5rem; text-align: center;">
-                        <p style="font-size: 0.7rem; color: #444;">Enviar presupuesto por WhatsApp</p>
+                        <p id="whatsapp-hint" style="font-size: 0.7rem; color: #444;">Enviar presupuesto por WhatsApp
+                        </p>
                     </div>
                 </div>
             </div>
