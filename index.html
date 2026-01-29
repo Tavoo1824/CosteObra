@@ -23,7 +23,7 @@
             <h1 class="main-title">
                 Presupuesto de reformas en Gran Canaria al instante
             </h1>
-            <p class="header-subtitle">Calcula el precio de tu reforma en Las Palmas y resto de municipios con costes
+            <p class="header-subtitle">Calcula el precio de tu reforma en Gran Canaria con costes
                 claros y sin sorpresas.</p>
             <p class="header-desc">Presupuestos orientativos de reformas, fontanería, electricidad, alicatados y pintura
                 en Gran Canaria.</p>
@@ -38,14 +38,17 @@
                     </div>
                 </section>
 
-                <!-- Zone Selection -->
+                <!-- Municipality Selection -->
                 <section>
                     <h2 class="section-title">
-                        1. Zona de la reforma
+                        1. Municipio de la reforma
                     </h2>
-                    <p class="section-desc">El precio se ajusta automáticamente según la zona de Gran Canaria:</p>
-                    <div id="zone-container" class="zone-grid">
-                        <!-- Zones rendered by JS -->
+                    <p class="section-desc">Selecciona el municipio donde se realizará la obra:</p>
+                    <div class="municipality-wrapper" style="margin-top: 1rem;">
+                        <select id="municipality-select" class="input-field"
+                            style="width: 100%; padding: 12px; font-size: 1rem;">
+                            <!-- Options populated by JS -->
+                        </select>
                     </div>
                 </section>
 
@@ -88,7 +91,7 @@
                 <!-- Footer -->
                 <footer>
                     <p>CosteObra Gran Canaria © 2026</p>
-                    <p>Zona A: Las Palmas, Telde, Mogán | Zona B: Arucas, Sta. Brígida | Zona C: Rural</p>
+                    <p>Servicio disponible en todos los municipios de Gran Canaria.</p>
                 </footer>
             </div>
 
@@ -126,8 +129,7 @@
                         </a>
                     </div>
                     <p style="font-size: 0.8rem; color: #999; margin-bottom: 1rem; margin-top: 0.5rem;">
-                        Cálculo orientativo basado en servicios seleccionados, zona y margen de empresa aplicado de
-                        forma visible.
+                        Cálculo final estimado.
                     </p>
 
                     <div style="margin-bottom: 1rem; font-size: 0.9rem;">
@@ -135,20 +137,19 @@
                             <span>Base Servicios:</span>
                             <span id="val-services">0.00 €</span>
                         </div>
-                        <div id="row-zone" class="summary-row muted">
-                            <span id="lbl-zone">Ajuste Zona (B):</span>
+                        <!-- Zone and Margin Hidden -->
+                        <div id="row-zone" class="summary-row muted" style="display: none;">
+                            <span id="lbl-zone">Ajuste Zona:</span>
                             <span id="val-zone">0.00 €</span>
                         </div>
-                        <div class="summary-row muted" style="position: relative;">
-                            <span>
-                                Costes de gestión y coordinación
-                                <div class="tooltip">
-                                    ℹ️
-                                    <span class="tooltip-text">Incluye desplazamientos, coordinación de gremios y margen
-                                        del profesional</span>
-                                </div>
-                            </span>
+                        <div class="summary-row muted" style="display: none;"> <!-- Margin Hidden -->
+                            <span>Costes de gestión</span>
                             <span id="val-margin">0.00 €</span>
+                        </div>
+
+                        <div
+                            style="font-size: 0.8rem; color: #888; margin-top: 8px; margin-bottom: 8px; font-style: italic;">
+                            Presupuesto orientativo según características del servicio y ubicación.
                         </div>
                         <div id="row-urgency" class="summary-row urgent" style="display: none;">
                             <span>Urgencia (+15%):</span>
@@ -159,6 +160,14 @@
                             Servicio urgente: sujeto a disponibilidad inmediata del profesional. El precio final se
                             confirmará tras la valoración directa.
                         </div>
+
+                        <!-- Promo Message -->
+                        <div class="promo-message"
+                            style="background-color: #fff8e1; border: 1px solid #ffe58f; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 0.85rem; color: #856404;">
+                            🎉 <strong>Promoción limitada:</strong> 15% de descuento para los 10 primeros presupuestos
+                            aceptados tras la visita del técnico.
+                        </div>
+
                         <div class="summary-total">
                             <span>TOTAL ESTIMADO:</span>
                             <div style="text-align: right;">

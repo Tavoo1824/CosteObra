@@ -9,6 +9,34 @@ const GLOBAL_CONSTANTS = {
         A: 1.15, // Alta demanda
         B: 1.00, // Media
         C: 0.90, // Baja demanda
+        D: 1.20, // Lejanía (La Aldea)
+    },
+    MUNICIPALITIES: {
+        // ZONA A
+        "Las Palmas de Gran Canaria": "A",
+        "Telde": "A",
+        "Santa Lucía de Tirajana": "A",
+        "San Bartolomé de Tirajana": "A",
+        "Mogán": "A",
+        "Arucas": "A",
+        "Ingenio": "A",
+        "Agüimes": "A",
+        // ZONA B
+        "Santa Brígida": "B",
+        "Teror": "B",
+        "Gáldar": "B",
+        "Guía": "B",
+        "Moya": "B",
+        "Firgas": "B",
+        "Valsequillo": "B",
+        "Tejeda": "B",
+        // ZONA C
+        "Artenara": "C",
+        "Agaete": "C",
+        "San Mateo": "C",
+        "Valleseco": "C",
+        // ESPECIAL (Zona D)
+        "La Aldea de San Nicolás": "D"
     }
 };
 
@@ -96,7 +124,8 @@ const CATEGORY_SEO_TEXT = {
  * STATE MANAGEMENT
  */
 const state = {
-    zone: 'B',
+    zone: 'A', // Default to A (Las Palmas)
+    municipality: 'Las Palmas de Gran Canaria',
     isUrgent: false,
     selection: {}, // { serviceId: quantity }
     name: '',
@@ -158,12 +187,13 @@ function generateWhatsAppLink(breakdown, zone, customerName, projectDesc) {
 
     let text = `Hola, quiero presupuesto para una reforma en Gran Canaria.\n`;
     if (customerName) text += `Soy: ${customerName}\n`;
-    text += `Zona: ${zone}\n`;
+    text += `Municipio: ${state.municipality}\n`; // Changed from Zone to Municipality
     text += `Servicios seleccionados:\n`;
     breakdown.serviceLines.forEach(line => {
         text += `- ${line.name} x${line.quantity}\n`;
     });
     text += `\nTotal Estimado: ${breakdown.total.toFixed(2)} € (IGIC no incl.)\n`;
+    text += `\nQuiero optar al 15% de descuento por aceptación tras visita técnica.\n`;
     if (projectDesc) text += `\nDetalles: ${projectDesc}`;
 
     return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
@@ -174,7 +204,7 @@ function generateWhatsAppLink(breakdown, zone, customerName, projectDesc) {
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    initZoneSelector();
+    initMunicipalitySelector();
     renderServices();
     initUrgencyToggle();
     initInputs();
@@ -182,35 +212,29 @@ document.addEventListener('DOMContentLoaded', () => {
     initLeadTracking(); // Lead tracking initialization
 });
 
-function initZoneSelector() {
-    const zones = [
-        { id: 'A', label: 'Zona A', desc: 'Las Palmas, Telde, Mogán', micro: 'Zona urbana estándar' },
-        { id: 'B', label: 'Zona B', desc: 'Arucas, Santa Brígida, Gáldar', micro: '+0–5% desplazamiento' },
-        { id: 'C', label: 'Zona C', desc: 'Zonas rurales', micro: '+10–15% desplazamiento' },
-    ];
+function initMunicipalitySelector() {
+    const selector = document.getElementById('municipality-select');
+    if (!selector) return;
 
-    const container = document.getElementById('zone-container');
-    container.innerHTML = zones.map(zone => `
-        <div class="zone-card ${state.zone === zone.id ? 'selected' : ''}" data-id="${zone.id}" onclick="selectZone('${zone.id}')">
-            <div class="zone-header">${zone.label}</div>
-            <div class="zone-desc">${zone.desc}</div>
-            <div class="zone-micro">${zone.micro}</div>
-        </div>
-    `).join('');
+    // Sort municipalities alphabetically
+    const municipalities = Object.keys(GLOBAL_CONSTANTS.MUNICIPALITIES).sort();
+
+    // Populate options
+    selector.innerHTML = municipalities.map(m =>
+        `<option value="${m}" ${m === state.municipality ? 'selected' : ''}>${m}</option>`
+    ).join('');
+
+    // Event listener
+    selector.addEventListener('change', (e) => {
+        selectMunicipality(e.target.value);
+    });
 }
 
-function selectZone(zoneId) {
-    state.zone = zoneId;
+function selectMunicipality(municipality) {
+    state.municipality = municipality;
+    state.zone = GLOBAL_CONSTANTS.MUNICIPALITIES[municipality];
 
-    // Update visual selection
-    document.querySelectorAll('.zone-card').forEach(card => {
-        if (card.dataset.id === zoneId) {
-            card.classList.add('selected');
-        } else {
-            card.classList.remove('selected');
-        }
-    });
-
+    // Auto-update budget on change
     updateBudgetSummary();
 }
 
@@ -387,17 +411,26 @@ function updateBudgetSummary() {
     // Update Values
     document.getElementById('val-services').textContent = breakdown.servicesTotal.toFixed(2) + ' €';
 
-    const zoneRow = document.getElementById('row-zone');
-    const valZone = document.getElementById('val-zone');
-    if (breakdown.zoneSurcharge !== 0) {
-        valZone.textContent = (breakdown.zoneSurcharge > 0 ? '+' : '') + breakdown.zoneSurcharge.toFixed(2) + ' €';
-    } else {
-        valZone.textContent = '0.00 €';
-    }
-    // Update label text for zone
-    document.getElementById('lbl-zone').textContent = `Ajuste Zona (${state.zone}):`;
+    // HIDDEN ZONE & MARGIN DISPLAY - User Request:
+    // "El usuario no debe ver Zona A / B / C ni recargos o descuentos."
+    // "El resumen debe mostrar únicamente: Desglose de servicios, Total estimado"
 
-    document.getElementById('val-margin').textContent = '+' + breakdown.marginAmount.toFixed(2) + ' €';
+    // We update the "total" directly. 
+    // If lines exist in HTML but we want to hide them, we should set display none or remove them from HTML.
+    // I will remove them from HTML in the next step, but here I should stop trying to update them if they don't exist
+    // or set them to empty if they do. 
+    // To be safe, I'll check existence or just assume HTML will be cleaned.
+
+    const zoneRow = document.getElementById('row-zone');
+    if (zoneRow) zoneRow.style.display = 'none';
+
+    // We can show a neutral text instead
+    // "Texto neutro tipo: “Presupuesto orientativo según características del servicio”"
+    // I will add this to the HTML structure later or inject it here.
+    // For now, let's just ensuring we don't error out on missing IDs later.
+
+    const marginRow = document.getElementById('val-margin') ? document.getElementById('val-margin').parentElement : null;
+    if (marginRow) marginRow.style.display = 'none';
 
     const urgencyRow = document.getElementById('row-urgency');
     if (breakdown.urgencySurcharge > 0) {
@@ -412,9 +445,6 @@ function updateBudgetSummary() {
     if (urgencyNotice) {
         urgencyNotice.style.display = (breakdown.urgencySurcharge > 0) ? 'block' : 'none';
     }
-
-    // Update WhatsApp Hint Text - REMOVED to reduce noise
-    // The static text "Enviar presupuesto por WhatsApp" will remain.
 
     document.getElementById('val-total').textContent = breakdown.total.toFixed(2) + ' €';
 
