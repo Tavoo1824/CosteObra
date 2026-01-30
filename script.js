@@ -514,6 +514,7 @@ function initLeadTracking() {
             id: 'lead_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
             date: new Date().toISOString(),
             zona: state.zone,
+            municipio: state.municipality,
             urgente: state.isUrgent,
             services: breakdown.serviceLines.map(s => `${s.name} (x${s.quantity})`),
             total: breakdown.total.toFixed(2),
