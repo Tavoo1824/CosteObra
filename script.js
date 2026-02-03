@@ -193,7 +193,7 @@ function generateWhatsAppLink(breakdown, zone, customerName, projectDesc) {
         text += `- ${line.name} x${line.quantity}\n`;
     });
     text += `\nTotal Estimado: ${breakdown.total.toFixed(2)} € (IGIC no incl.)\n`;
-    text += `\nQuiero optar al 15% de descuento por aceptación tras visita técnica.\n`;
+
     if (projectDesc) text += `\nDetalles: ${projectDesc}`;
 
     return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
